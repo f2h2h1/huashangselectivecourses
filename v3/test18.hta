@@ -36,18 +36,18 @@ MinimizeButton = Yes>
         
         var main = document.getElementById("main");
         
-        // python xuankefunc4.py 119.145.67.59 80 416262249 aa123123 羽毛球 陈昌盛 周五第7,8节 1
+        // python xuankefunc4.py 119.145.67.59 80 学号 密码 羽毛球 陈昌盛 周五第7,8节 1
         var batcmd;
         var objShell= new ActiveXObject("WScript.Shell")
         try {
             for (var i = 2; i <= rows; i++) {
                 param = ""
-                param += " " + oSheet.Cells(i, 1).value
-                param += " " + oSheet.Cells(i, 2).value
-                param += " " + oSheet.Cells(i, 3).value
-                param += " " + oSheet.Cells(i, 4).value
-                param += " " + oSheet.Cells(i, 5).value
-                param += " " + oSheet.Cells(i, 6).value
+                param += " " + oSheet.Cells(i, 1).value // 学号
+                param += " " + oSheet.Cells(i, 2).value // 密码
+                param += " " + oSheet.Cells(i, 3).value // 课程名称
+                param += " " + oSheet.Cells(i, 4).value // 教师姓名
+                param += " " + oSheet.Cells(i, 5).value // 上课时间
+                param += " " + oSheet.Cells(i, 6).value // 已选修的课的数量
                 p = document.createElement("p");
                 batcmd = "python xuankefunc4.py 119.145.67.59 8889" + param;
                 p.innerHTML = batcmd
