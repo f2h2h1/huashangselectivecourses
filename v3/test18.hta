@@ -1,0 +1,100 @@
+<Html>
+<Head>
+<Title>NH Studio</Title>
+<Style>
+    Body {Background-Color: CornSilk}
+</Style>
+<HTA:Application
+Caption = Yes
+Border = Thick
+Scroll = Yes
+ShowInTaskBar = Yes
+MaximizeButton = Yes
+MinimizeButton = Yes>
+<script Language = VBScript>
+    Sub Window_OnLoad
+    Window.ResizeTo 800,600
+    End Sub
+</script>
+<script Language = JavaScript>
+    function ReadExcel() {
+        var tempStr = "";
+        //得到文件路径的值
+        var filePath = document.getElementById("upfile").value;
+        //创建操作EXCEL应用程序的实例
+        var oXL = new ActiveXObject("Excel.application");
+        //打开指定路径的excel文件
+        var oWB = oXL.Workbooks.open(filePath);
+        //操作第一个sheet(从一开始，而非零)
+        oWB.worksheets(1).select();
+        var oSheet = oWB.ActiveSheet;
+        //使用的行数
+        rows =  oSheet.usedrange.rows.count;
+
+        //oSheet.Cells(1, 1).value // 第一行第一列的值
+        //oSheet.Cells(1, 2).value // 第一行第二列的值
+        
+        var main = document.getElementById("main");
+        
+        // python xuankefunc4.py 119.145.67.59 80 416262249 aa123123 羽毛球 陈昌盛 周五第7,8节 1
+        var batcmd;
+        var objShell= new ActiveXObject("WScript.Shell")
+        try {
+            for (var i = 2; i <= rows; i++) {
+                param = ""
+                param += " " + oSheet.Cells(i, 1).value
+                param += " " + oSheet.Cells(i, 2).value
+                param += " " + oSheet.Cells(i, 3).value
+                param += " " + oSheet.Cells(i, 4).value
+                param += " " + oSheet.Cells(i, 5).value
+                param += " " + oSheet.Cells(i, 6).value
+                p = document.createElement("p");
+                batcmd = "python xuankefunc4.py 119.145.67.59 8889" + param;
+                p.innerHTML = batcmd
+                main.appendChild(p);
+                objShell.Run(batcmd,1,false)
+                // p = document.createElement("p");
+                // batcmd = "python webs20_001.py 119.145.67.59 80 " + oSheet.Cells(i, 1).value + " " + oSheet.Cells(i, 2).value + " 网络";
+                // p.innerHTML = batcmd
+                // main.appendChild(p);
+                // objShell.Run(batcmd,1,false)
+                // p = document.createElement("p");
+                // batcmd = "python webs20_001.py 172.16.17.113 80 " + oSheet.Cells(i, 1).value + " " + oSheet.Cells(i, 2).value + " 网络";
+                // p.innerHTML = batcmd
+                // main.appendChild(p);
+                // objShell.Run(batcmd,1,false)
+                // p = document.createElement("p");
+                // batcmd = "python webs20_001.py 172.16.17.110 80 " + oSheet.Cells(i, 1).value + " " + oSheet.Cells(i, 2).value + " 网络";
+                // p.innerHTML = batcmd
+                // main.appendChild(p);
+                // objShell.Run(batcmd,1,false)
+            }
+        } catch(e) {
+            alert(e);
+        }
+        //退出操作excel的实例对象
+        oXL.Application.Quit();
+        //手动调用垃圾收集器
+        CollectGarbage();
+    }
+    function clear() {
+        var main = document.getElementById("main");
+        main.innerHTML = "";
+    }
+</script>
+<script Language = VBScript>
+
+</script>
+<Body>
+    <p>
+    <h3 align=left>
+        <font color='Orange'>NH Studio</font>
+    </h3>
+    <div></div>
+    <table align='left'>
+    <input type="file" id="upfile"/>
+    <input type="button" onclick="ReadExcel()" value="run"/>
+    <input type="button" onclick="clear()" value="clear"/>
+    <div id="main"></div>
+</Body>
+</html>
