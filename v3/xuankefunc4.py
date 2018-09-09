@@ -142,7 +142,7 @@ def open_xuanke(url, studentid, postdata = ""):
     time.sleep(3)
     url = url +'xf_xsqxxxk.aspx?xh=' + studentid + "&gnmkdm=N121203"
     headers_data={
-        'Host': '119.145.67.59', 
+        'Host': '119.145.67.59',
         'Connection': 'keep-alive',
         # 'Content-Length': '197',
         'Cache-Control': 'max-age=0',
@@ -203,7 +203,7 @@ def srarch_tag_class(result, tagclass, teacher = "", classtime = "", classcode =
     # exit()
     # 抓取隐藏字段
     VIEWSTATE =re.findall(r'<input type="hidden" name="__VIEWSTATE" value="(.*?)" />', result, re.I)
-    
+
     # 0多选框 1预定教材 2课程名称 3课程代码 4教师名称 5上课时间
     # 搜索目标课程
     tagflg = 0
@@ -366,8 +366,9 @@ def post_xuenke(url, studentid, postdata, tagclass, taglen, teacher, classtime):
     result = check_tag_class(result['getstr'], tagclass, taglen, teacher, classtime)
     if result['status'] == 1:
         # 成功选到目标课程
-        print("成功选到目标课程")
-        xuankefinish(studentid, tagclass, teacher, classtime, result['desc'])
+        desc = "成功选到目标课程"
+        print(desc)
+        xuankefinish(studentid, tagclass, teacher, classtime, desc)
     elif result['status'] == -1:
         # 已选课,不过所选课程貌似不是目标课程
         print("已选课,不过所选课程貌似不是目标课程")
