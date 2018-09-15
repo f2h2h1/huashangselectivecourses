@@ -13,14 +13,8 @@ import string
 class FError(Exception):
     pass
 
-# 打印变量用的函数
-def print_all(module_):
-  modulelist = dir(module_)
-  length = len(modulelist)
-  for i in range(0,length,1):
-    print (module_,modulelist[i])
-
 # 去除html属性
+# 去除已选课程表格的html属性
 class MyHTMLParser(HTMLParser):
     age = ""
     def handle_starttag(self, tag, attrs):
@@ -41,6 +35,77 @@ class MyHTMLParser(HTMLParser):
     def handle_data(self, data):
         # print(data)
         self.age += data
+# 去除可选课程表格的html属性
+class MyHTMLParser2(HTMLParser):
+    age = ""
+    title = ""
+    def handle_starttag(self, tag, attrs):
+        # print('<%s>' % tag)
+        # 获取完整的上课时间（包含单双周的上课时间）
+        if tag == "td":
+            if len(attrs) > 0:
+                if len(attrs[0]) > 0 and attrs[0][0] == "title":
+                    self.title = attrs[0][1]
+        tag = '<'+tag+'>'
+        self.age += tag
+
+    def handle_endtag(self, tag):
+        # print('</%s>' % tag)
+        tag = '</'+tag+'>'
+        self.age += tag
+
+    def handle_startendtag(self, tag, attrs):
+        # print('<%s/>' % tag)
+        tag = '<'+tag+'/>'
+        self.age += tag
+
+    def handle_data(self, data):
+        # print(data)
+        if self.title != "":
+            self.age += self.title
+            self.title = ""
+        else:
+            self.age += data
+
+
+# 打印日志的函数
+def logger(str):
+    desc = "["+time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())+"]" + str + "\n"
+    print(desc)
+    # log_name是全局变量
+    fo = open(log_name, "a")
+    fo.write(desc)
+    fo.close()
+
+# 打印变量用的函数
+def print_all(module_):
+  modulelist = dir(module_)
+  length = len(modulelist)
+  for i in range(0,length,1):
+    print (module_,modulelist[i])
+
+# 初始化
+def init(ipaddress, port, studentid, password, tagclass, teacher, classtime, taglen):
+    # 设置cmd编码
+    os.system('chcp 65001')
+    # 设置cmd标题
+    os.system("title " + studentid + " " +tagclass)
+    # 设置cmd窗口大小
+    os.system('mode con: cols=95')
+
+    print("If you encounter a garbled code, please set the font of the command line to be Chinese font.")
+
+    global log_name # 日志文件名
+    log_name = studentid + "-" + str(int(time.time())) + ".log"
+
+    init = ipaddress + "    " + \
+            port + "    " + \
+            studentid + "    " + \
+            tagclass + "    " + \
+            teacher + "    " + \
+            classtime + "    " + \
+            taglen + "    "
+    logger(init)
 
 # curl函数
 def basecurl(url, login_data = "", headers_data = {}):
@@ -65,10 +130,10 @@ def get_new_sessionid(ipaddress, port):
     url = ipaddress + ':' + port + '/' + 'default2.aspx'
     result = basecurl(url)
     if result['status'] != 1:
-        print("登录页面打开失败")
+        logger("登录页面打开失败")
         ret = {"status":-1, "desc":"session获取失败", "error":result['desc']}
     else:
-        print("登录页面打开成功")
+        logger("登录页面打开成功")
         # 抓取sessionid
         m = re.match(r'.*\((.*)\).*', result['geturl'])
         sessionid = m.group(1)
@@ -88,18 +153,18 @@ def post_denglu(url, studentid, password):
                 ])
     result = basecurl(url, postdata)
     if result['status'] != 1:
-        print("登录参数发送失败")
+        logger("登录参数发送失败")
         ret = {"status":0, "desc":"登录参数发送失败", "error":result['desc']}
     else:
-        print("登录参数发送成功")
+        logger("登录参数发送成功")
         p1 = r'评价完后请完善个人信息和修改登入密码' # 这是我们写的正则表达式
         pattern1 = re.compile(p1) # 正则表达式编译
         matcher1 = re.search(pattern1, result['getstr']) # 正则表达式查询
         if matcher1 == None:
-            print("登录失败")
+            logger("登录失败")
             ret = {"status":-2, "desc":"登录失败"}
         else:
-            print("登录成功")
+            logger("登录成功")
             ret = {"status":1, "desc":"登录成功"}
     return ret
 
@@ -109,7 +174,7 @@ def denglu(ipaddress, port, studentid, password):
     if result['status'] != 1:
         # sessionid获取失败
         desc = "sessionid获取失败"
-        print(desc)
+        logger(desc)
         ret = {"status":0, "desc":desc, "errors":result['desc']}
     else:
         # sessionid获取成功
@@ -128,11 +193,11 @@ def is_jw_restart(key):
     matcher1 = re.search(pattern1, key) # 正则表达式查询
     if matcher1 == None:
         desc = "没有回到登录页面，教务系统没有重启"
-        print(desc)
+        logger(desc)
         ret = {"status":1, "desc":desc}
     else:
         desc = "回到登录页面，目测教务系统重启了"
-        print(desc)
+        logger(desc)
         ret = {"status":0, "desc":desc}
     return ret
 
@@ -158,7 +223,7 @@ def open_xuanke(url, studentid, postdata = ""):
         }
     result = basecurl(url, postdata, headers_data)
     if result['status'] != 1:
-        print("选课页面打开失败 00")
+        logger("选课页面打开失败 00")
         ret = {"status":0, "desc":"选课页面打开失败 00", "error":result['desc']}
     else:
         # 判断教务系统是否重启
@@ -170,11 +235,11 @@ def open_xuanke(url, studentid, postdata = ""):
         pattern1 = re.compile(p1) # 正则表达式编译
         matcher1 = re.search(pattern1, result['getstr']) # 正则表达式查询
         if matcher1 == None:
-            print("选课页面打开失败 01")
-            print(result['getstr'])
+            logger("选课页面打开失败 01")
+            logger(result['getstr'])
             ret = {"status":-1, "desc":"选课页面打开失败 01", "getstr":result['getstr']}
         else:
-            print("选课页面打开成功")
+            logger("选课页面打开成功")
             ret = {"status":1, "desc":"选课页面打开成功", "getstr":result['getstr']}
     return ret
 
@@ -189,7 +254,7 @@ def srarch_tag_class(result, tagclass, teacher = "", classtime = "", classcode =
     xuanketable = re.findall(r'<table class="datelist " cellspacing="0" cellpadding="3" border="0" id="kcmcGrid" width="100%">[\s\S]*?<\/table>', result, re.I)
     # print(xuanketable[0])
     # 清除html标签的属性
-    parser = MyHTMLParser()
+    parser = MyHTMLParser2()
     parser.feed(xuanketable[0])
     # print(parser.age)
     # 抓取tr标签
@@ -208,6 +273,7 @@ def srarch_tag_class(result, tagclass, teacher = "", classtime = "", classcode =
     # 搜索目标课程
     tagflg = 0
     for i in range(0, len(xuanketabletr)):
+        # print(xuanketabletd[i])
         # print(xuanketabletd[i][2])
         # 匹配课程名称
         pattern1 = re.compile(tagclass)
@@ -225,10 +291,10 @@ def srarch_tag_class(result, tagclass, teacher = "", classtime = "", classcode =
                     continue
             tagflg = 1
             tagclassnumber = i + 1
-            print(xuanketabletd[i][2])
+            logger(xuanketabletd[i][2] + xuanketabletd[i][4] + xuanketabletd[i][5])
             break
     if (tagflg == 1):
-        print("目标课程搜索成功")
+        logger("目标课程搜索成功")
 
         # 拼接选课的post数据
         postdata =  parse.urlencode([
@@ -243,8 +309,8 @@ def srarch_tag_class(result, tagclass, teacher = "", classtime = "", classcode =
         postdata = postdata + '&dpkcmcGrid%3AtxtChoosePage=1&dpkcmcGrid%3AtxtPageSize=' + dpkcmcGridAtxtPageSize[0][0] + '&Button1=++%CC%E1%BD%BB++'
         ret = {"status":1, "postdata":postdata}
     else:
-        print("目标课程搜索失败")
-        print("发送每页显示200条记录的请求")
+        logger("目标课程搜索失败")
+        logger("发送每页显示200条记录的请求")
 
         # 拼接每页显示200条记录的post字段
         postdata =  parse.urlencode([
@@ -260,7 +326,7 @@ def srarch_tag_class(result, tagclass, teacher = "", classtime = "", classcode =
         ret = {"status":0, "postdata":postdata}
     return ret
 
-# # 检测是否已选课
+# 检测是否已选课
 # 如果有则返回1，没有则返回0
 def check_tag_class(result, tagclass, taglen, teacher = "", classtime = ""):
     # 抓取已选课的表格
@@ -278,6 +344,7 @@ def check_tag_class(result, tagclass, taglen, teacher = "", classtime = ""):
     # 0课程名称 1教师姓名 6上课时间
     yitagflg = 0
     for i in range(0, len(yixuanketabletr)):
+        # print(yixuanketabletd[i])
         # print(xuanketabletd[i][2])
         # 匹配课程名称
         pattern1 = re.compile(tagclass) # 同样是编译
@@ -290,30 +357,69 @@ def check_tag_class(result, tagclass, taglen, teacher = "", classtime = ""):
             # 匹配上课时间
             if classtime != "":
                 pattern1 = re.compile(classtime) # 同样是编译
-                matcher1 = re.search(pattern1,yixuanketabletd[i][6]) # 同样是查询
+                matcher1 = re.search(pattern1,yixuanketabletd[i][1]) # 同样是查询
                 if matcher1 == None:
                     continue
-            # print(yixuanketabletd[i][1])
+            logger(yixuanketabletd[i][0] + yixuanketabletd[i][1] + yixuanketabletd[i][1])
             yitagflg = 1
             break
     if (yitagflg == 1):
         desc = "目标课程在已选课的表格中搜索到"
-        print(desc)
-        ret = {"status":1, "desc":desc, "yixuanketabletd":yixuanketabletd, "yixuanketabletdlen":len(yixuanketabletr)}
+        logger(desc)
+        ret = {"status":1, "desc":desc, "yixuanketabletr":yixuanketabletr, "yixuanketabletd":yixuanketabletd, "yixuanketabletdlen":len(yixuanketabletr)}
     else:
         desc = "目标课程在已选课的表格中搜索不到"
-        if len(yixuanketabletr) - 1 > int(taglen):
-            desc = desc + "，已选课"
-            ret = {"status":-1, "desc":desc, "yixuanketabletr":yixuanketabletr, "yixuanketabletdlen":len(yixuanketabletr)}
+        # taglen = int(taglen)
+        if taglen == -1:
+            desc = desc + "，未选课2"
+            ret = {"status":0, "desc":desc, "yixuanketabletr":yixuanketabletr, "yixuanketabletd":yixuanketabletd, "yixuanketabletdlen":len(yixuanketabletr)}
         else:
-            desc = desc + "，未选课"
-            ret = {"status":0, "desc":desc, "yixuanketabletr":yixuanketabletr, "yixuanketabletdlen":len(yixuanketabletr)}
-        print(desc)
+            if len(yixuanketabletr) - 1 > taglen:
+                desc = desc + "，已选课"
+                ret = {"status":-1, "desc":desc, "yixuanketabletr":yixuanketabletr, "yixuanketabletd":yixuanketabletd, "yixuanketabletdlen":len(yixuanketabletr)}
+            else:
+                desc = desc + "，未选课"
+                ret = {"status":0, "desc":desc, "yixuanketabletr":yixuanketabletr, "yixuanketabletd":yixuanketabletd, "yixuanketabletdlen":len(yixuanketabletr)}
+        logger(desc)
     return ret
 
+# post选课数据
+def post_xuenke(url, studentid, postdata, tagclass, taglen, teacher, classtime):
+    logger("发送选课的post数据")
+    # post选课数据
+    result = open_xuanke(url, studentid, postdata)
+    while result['status'] != 1:
+        logger("发送选课的post数据失败，正在重试")
+        result = open_xuanke(url, studentid, postdata)
+        return
+    logger("发送选课的post数据成功")
+    # 检测是否已选课
+    result = check_tag_class(result['getstr'], tagclass, taglen, teacher, classtime)
+    if result['status'] == 1:
+        # 成功选到目标课程
+        desc = "成功选到目标课程"
+        logger(desc)
+        xuankefinish(studentid, tagclass, teacher, classtime, desc, result['yixuanketabletr'])
+    elif result['status'] == -1:
+        # 已选课,不过所选课程貌似不是目标课程
+        logger("已选课,不过所选课程貌似不是目标课程")
+        xuankefinish(studentid, tagclass, teacher, classtime, result['desc'], result['yixuanketabletr'])
+    elif result['status'] == 0:
+        # 已经发送选课请求，但貌似没有成功，正在重试
+        logger("已经发送选课请求，但貌似没有成功，正在重试")
+        # xuanke(url, studentid, tagclass, teacher, classtime, taglen)
+        xuankefinish(studentid, tagclass, teacher, classtime, result['desc'], result['yixuanketabletr'])
+
+# 选课结束时调用的函数
+def xuankefinish(studentid, tagclass, teacher, classtime, desc, getstr = ""):
+    # textstr = desc + '\t' + studentid + "-" + tagclass + "-" + teacher + "-" + classtime + '\t' + str(getstr)
+    logger(str(getstr))
+    os.system("pause")
+    exit()
+
 # url       = "http://119.145.67.59:8889/(4viuo2ulgajodxqsffgias55)/"
-# studentid = "416262249"     # 学号
-# password  = "aa123123"      # 密码
+# studentid = ""     # 学号
+# password  = ""      # 密码
 # tagclass  = "健美操"         # 课程名称
 # teacher   = "陈泉宇"         # 教师姓名
 # classtime = "周五第7,8节"    # 上课时间
@@ -325,7 +431,7 @@ def xuanke(url, studentid, tagclass, teacher, classtime, taglen):
     if result['status'] != 1:
         # 选课页面打开失败
         # xuanke(url, studentid, tagclass, teacher, classtime, taglen)
-        print(result['desc'])
+        logger(result['desc'])
         ret = {"status":0, "desc":result['desc']}
         return ret
     getstr = result['getstr']
@@ -333,7 +439,7 @@ def xuanke(url, studentid, tagclass, teacher, classtime, taglen):
     result = check_tag_class(getstr, tagclass, taglen, teacher, classtime)
     if result['status'] == 1 or result['status'] == -1:
         # 已选课
-        xuankefinish(studentid, tagclass, teacher, classtime, result['desc'])
+        xuankefinish(studentid, tagclass, teacher, classtime, result['desc'], result['yixuanketabletr'])
 
     # 搜索目标课程
     result = srarch_tag_class(getstr, tagclass, teacher, classtime)
@@ -350,101 +456,67 @@ def xuanke(url, studentid, tagclass, teacher, classtime, taglen):
             post_xuenke(url, studentid, result['postdata'], tagclass, taglen, teacher, classtime)
         else:
             desc = "目标课程不存在，可能已经选完了"
-            print(desc)
+            logger(desc)
             xuankefinish(studentid, tagclass, teacher, classtime, desc)
-# post选课数据
-def post_xuenke(url, studentid, postdata, tagclass, taglen, teacher, classtime):
-    print("发送选课的post数据")
-    # post选课数据
-    result = open_xuanke(url, studentid, postdata)
-    while result['status'] != 1:
-        print("发送选课的post数据失败，正在重试")
-        result = open_xuanke(url, studentid, postdata)
-        return
-    print("发送选课的post数据成功")
-    # 检测是否已选课
-    result = check_tag_class(result['getstr'], tagclass, taglen, teacher, classtime)
-    if result['status'] == 1:
-        # 成功选到目标课程
-        desc = "成功选到目标课程"
-        print(desc)
-        xuankefinish(studentid, tagclass, teacher, classtime, desc)
-    elif result['status'] == -1:
-        # 已选课,不过所选课程貌似不是目标课程
-        print("已选课,不过所选课程貌似不是目标课程")
-        xuankefinish(studentid, tagclass, teacher, classtime, result['desc'])
-    elif result['status'] == 0:
-        # 已经发送选课请求，但貌似没有成功，正在重试
-        print("已经发送选课请求，但貌似没有成功，正在重试")
-        xuanke(url, studentid, tagclass, teacher, classtime, taglen)
-# 选课结束时调用的函数
-def xuankefinish(studentid, tagclass, teacher, classtime, desc, getstr = ""):
-    textstr = desc + '\t' + studentid + "-" + tagclass + "-" + teacher + "-" + classtime + '\t' + getstr
-    filename = desc
-    filename += '-'
-    filename += studentid
-    filename += '-'
-    filename += ''.join(random.sample(string.ascii_letters + string.digits, 8))
-    batcmd = 'echo ' + textstr + ' > ' + filename + '.txt'
-    os.system(batcmd)
-    # os.system("pause")
-    exit()
 
 if __name__ == '__main__':
-    if len(sys.argv) != 9 or \
-        sys.argv[1].strip() == '' or \
-        sys.argv[2].strip() == '' or \
-        sys.argv[3].strip() == '' or \
-        sys.argv[4].strip() == '' or \
-        sys.argv[5].strip() == '' or \
-        sys.argv[6].strip() == '' or \
-        sys.argv[7].strip() == '' or \
-        sys.argv[8].strip() == '':
-        print("命令行参数错误")
-        exit()
+    dev = False
+    if dev != True:
+        if len(sys.argv) != 9 or \
+            sys.argv[1].strip() == '' or \
+            sys.argv[2].strip() == '' or \
+            sys.argv[3].strip() == '' or \
+            sys.argv[4].strip() == '' or \
+            sys.argv[5].strip() == '' or \
+            sys.argv[6].strip() == '' or \
+            sys.argv[7].strip() == '' or \
+            sys.argv[8].strip() == '':
+            print("命令行参数错误")
+            exit()
 
-    ipaddress = sys.argv[1] # ip地址
-    port      = sys.argv[2] # 端口
-    studentid = sys.argv[3] # 学号
-    password  = sys.argv[4] # 密码
-    tagclass  = sys.argv[5] # 课程名称
-    teacher   = sys.argv[6] # 教师姓名
-    classtime = sys.argv[7] # 上课时间
-    taglen    = sys.argv[8] # 已选修课的数量
+        ipaddress = sys.argv[1] # ip地址
+        port      = sys.argv[2] # 端口
+        studentid = sys.argv[3] # 学号
+        password  = sys.argv[4] # 密码
+        tagclass  = sys.argv[5] # 课程名称
+        teacher   = sys.argv[6] # 教师姓名
+        classtime = sys.argv[7] # 上课时间
+        taglen    = sys.argv[8] # 已选修课的数量
+
+    else:
+        ipaddress = "119.145.67.59" # ip地址
+        port      = "80"            # 端口
+        studentid = ""     # 学号
+        password  = ""      # 密码
+        tagclass  = "中医养生与保健"         # 课程名称
+        teacher   = "汪丹"         # 教师姓名    陈昌盛
+        classtime = "周一第7,8节{第4-18周|双周}"    # 上课时间    周五第7,8节    周一第7,8节{第4-18周|双周}
+        taglen    = "NULL"               # 已选修的课的数量
+
+        print("dev")
+    # exit()
+
+    init(ipaddress, port, studentid, password, tagclass, teacher, classtime, taglen)
 
     if teacher == "NULL":
         teacher = ""
     if classtime == "NULL":
         classtime = ""
     if taglen == "NULL":
-        taglen = 0
+        taglen = "-1"
     taglen = int(taglen)
-
-    # ipaddress = "119.145.67.59" # ip地址
-    # port      = "80"            # 端口
-    # studentid = ""     # 学号
-    # password  = ""      # 密码
-    # tagclass  = "羽毛球"         # 课程名称
-    # teacher   = "陈昌盛"         # 教师姓名
-    # classtime = "周五第7,8节"    # 上课时间
-    # taglen    = 1               # 已选修的课的数量
-
-    # teacher = ""
-    # classtime = ""
 
     while 1:
         # 登录
-        result = denglu(ipaddress, port, studentid, password)
+        result = {"status": -1}
         while result['status'] != 1:
             result = denglu(ipaddress, port, studentid, password)
         try:
             # 选课
             url = ipaddress + ":" + port + "/(" + result['sessionid'] + ")/"
-            result = xuanke(url, studentid, tagclass, teacher, classtime, taglen)
+            result = {"status": 0}
             while result['status'] == 0:
                 result = xuanke(url, studentid, tagclass, teacher, classtime, taglen)
-                # print("选课页面打开失败")
         except FError as e: # 捕获教务系统重启异常，重新开始登录
             print(e)
             continue
-    # os.system("pause")

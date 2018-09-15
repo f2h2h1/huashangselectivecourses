@@ -49,7 +49,7 @@ MinimizeButton = Yes>
 </h3>
 <table border="1">
 <tr><td>进程数</td><td><input type="text" id="processnum" value="3" /></td></tr>
-<tr><td>脚本名称</td><td><input type="text" id="scriptname" value="xuankefunc4.py" /></td></tr>
+<tr><td>脚本名称</td><td><input type="text" id="scriptname" value="xuankefunc.py" /></td></tr>
 <tr><td>ip</td><td><input type="text" id="ipaddress" value="119.145.67.59" /></td></tr>
 <tr><td>端口</td><td><input type="text" id="port" value="80" /></td></tr>
 <tr><td>学号</td><td><input type="text" id="studentid" value="" /></td></tr>
@@ -57,15 +57,16 @@ MinimizeButton = Yes>
 <tr><td>课程名称</td><td><input type="text" id="tagclass" value="" /></td></tr>
 <tr><td>教师姓名</td><td><input type="text" id="teacher" value="" /></td></tr>
 <tr><td>上课时间</td><td><input type="text" id="classtime" value="" /></td></tr>
-<tr><td>已选修课的数量</td><td><input type="text" id="taglen" value="" /></td></tr>
+<tr><td>已选修课的数量</td><td><input type="text" id="taglen" value="NULL" /></td></tr>
 <tr>
 <td colspan="2">
     <button type="button" onclick="ReadExcel()" style="display:block;width:200px;margin: 0 auto;">run</button>
 </td>
 </tr>
 </table>
-<p>如果教师姓名 上课时间 已选修课的数量不清楚的话，这三个参数请填NULL</p>
+<p>如果教师姓名 上课时间，这两个个参数请填NULL</p>
 <p>如果需要选修的课时网络课，教师姓名 上课时间 这两个参数也请填NULL</p>
+<p>如果填了已选修课的数量这个参数，将会通过已选课程表格里的课程数量判断选课是否成功</p>
 <p>如果不清楚默认参数的含义，请勿随意修改</p>
 <div id="main"></div>
 </body>
