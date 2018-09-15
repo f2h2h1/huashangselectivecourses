@@ -193,7 +193,7 @@ def is_jw_restart(key):
     matcher1 = re.search(pattern1, key) # 正则表达式查询
     if matcher1 == None:
         desc = "没有回到登录页面，教务系统没有重启"
-        logger(desc)
+        # logger(desc)
         ret = {"status":1, "desc":desc}
     else:
         desc = "回到登录页面，目测教务系统重启了"
@@ -407,8 +407,8 @@ def post_xuenke(url, studentid, postdata, tagclass, taglen, teacher, classtime):
     elif result['status'] == 0:
         # 已经发送选课请求，但貌似没有成功，正在重试
         logger("已经发送选课请求，但貌似没有成功，正在重试")
-        # xuanke(url, studentid, tagclass, teacher, classtime, taglen)
-        xuankefinish(studentid, tagclass, teacher, classtime, result['desc'], result['yixuanketabletr'])
+        xuanke(url, studentid, tagclass, teacher, classtime, taglen)
+        # xuankefinish(studentid, tagclass, teacher, classtime, result['desc'], result['yixuanketabletr'])
 
 # 选课结束时调用的函数
 def xuankefinish(studentid, tagclass, teacher, classtime, desc, getstr = ""):
