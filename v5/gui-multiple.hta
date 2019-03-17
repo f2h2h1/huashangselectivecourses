@@ -1,0 +1,108 @@
+<Html>
+<Head>
+<Title>NH Studio</Title>
+<Style>
+    Body {Background-Color: CornSilk}
+</Style>
+<HTA:Application
+Caption = Yes
+Border = Thick
+Scroll = Yes
+ShowInTaskBar = Yes
+MaximizeButton = Yes
+MinimizeButton = Yes>
+<script Language = VBScript>
+    Sub Window_OnLoad
+    Window.ResizeTo 900,600
+    End Sub
+</script>
+<script Language = JavaScript>
+    function ReadExcel() {
+        var tempStr = "";
+        //得到文件路径的值
+        var filePath = document.getElementById("upfile").value;
+        //创建一个可以将文件翻译成文件流的对象。
+        var fso=new ActiveXObject("Scripting.FileSystemObject");
+        //用于创建一个textStream 对象 
+        var f=fso.opentextfile(filePath, 1, false);
+        //第一行是表头，抛弃
+        f.Readline();
+        
+        var objShell= new ActiveXObject("WScript.Shell")
+
+        var scriptname = document.getElementById("scriptname").value // 脚本名称
+        // var ipaddress = document.getElementById("ipaddress").value // ip
+        // var port = document.getElementById("port").value // 端口
+        var len = document.getElementById("processnum").value; // 进程数
+
+        while (!f.AtEndOfStream) {
+            var line_str = f.Readline();
+            line_arr = line_str.split(",");
+            
+            var param = ""
+            // param += " " + scriptname; // 脚本名称
+            // param += " " + ipaddress; // ip
+            // param += " " + port; // 端口
+            param += " " + line_arr[0]; // 学号
+            param += " " + line_arr[1]; // 密码
+            param += " " + line_arr[2]; // 课程名称
+            param += " " + line_arr[3]; // 教师姓名
+            param += " " + line_arr[4]; // 上课时间
+            param += " " + line_arr[5]; // 已选修的课的数量
+
+            for (var i = 0; i < len; i++) {
+                p = document.createElement("p");
+                batcmd = "python " + scriptname + " 119.145.67.59 80" + param;
+                p.innerHTML = batcmd;
+                main.appendChild(p);
+                // objShell.Run(batcmd,1,false);
+
+                p = document.createElement("p");
+                batcmd = "python " + scriptname + " 119.145.67.59 8889" + param;
+                p.innerHTML = batcmd;
+                main.appendChild(p);
+                // objShell.Run(batcmd,1,false);
+
+                p = document.createElement("p");
+                batcmd = "python " + scriptname + " 119.145.67.59 8890" + param;
+                p.innerHTML = batcmd;
+                main.appendChild(p);
+                // objShell.Run(batcmd,1,false);
+
+                p = document.createElement("p");
+                p.innerHTML = "-----------------------------------------------------";
+                main.appendChild(p);
+            }
+
+            p = document.createElement("p");
+            p.innerHTML = "*****************************************************";
+            main.appendChild(p);
+        }
+
+    }
+    function clear() {
+        var main = document.getElementById("main");
+        main.innerHTML = "";
+    }
+</script>
+<script Language = VBScript>
+
+</script>
+<Body>
+    <p>
+    <h3 align=left>
+        <font color='Orange'>NH Studio</font>
+    </h3>
+    <div></div>
+
+    <label>脚本名称 <input type="text" id="scriptname" value="xuankefunc4.py" /></label>
+    <!-- <label>ip <input type="text" id="ipaddress" value="119.145.67.59" /></label>
+    <label>端口 <input type="text" id="port" value="80" /></label> -->
+    <label>进程数</td><td><input type="text" id="processnum" value="3" /></label>
+    <p></p>
+    <input type="file" id="upfile"/>
+    <input type="button" onclick="ReadExcel()" value="run"/>
+    <input type="button" onclick="clear()" value="clear"/>
+    <div id="main"></div>
+</Body>
+</html>

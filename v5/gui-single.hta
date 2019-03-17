@@ -1,0 +1,73 @@
+<html>
+<Head>
+<Title>NH Studio</Title>
+<Style>
+    Body {Background-Color: CornSilk}
+</Style>
+<HTA:Application
+Caption = Yes
+Border = Thick
+Scroll = Yes
+ShowInTaskBar = Yes
+MaximizeButton = Yes
+MinimizeButton = Yes>
+<script Language = VBScript>
+    Sub Window_OnLoad
+    Window.ResizeTo 400,800
+    End Sub
+</script>
+<script Language = JavaScript>
+    function ReadExcel() {
+        var main = document.getElementById("main");
+        // python xuankefunc4.py 119.145.67.59 80 学号 密码 羽毛球 陈昌盛 周五第7,8节 1
+        var batcmd;
+        var objShell= new ActiveXObject("WScript.Shell");
+        param = "";
+        param += " " + document.getElementById("scriptname").value // 脚本名称
+        param += " " + document.getElementById("ipaddress").value // ip
+        param += " " + document.getElementById("port").value // 端口
+        param += " " + document.getElementById("studentid").value // 学号
+        param += " " + document.getElementById("password").value // 密码
+        param += " " + document.getElementById("tagclass").value // 课程名称
+        param += " " + document.getElementById("teacher").value // 教师姓名
+        param += " " + document.getElementById("classtime").value // 上课时间
+        param += " " + document.getElementById("taglen").value // 已选修的课的数量
+        p = document.createElement("p");
+        batcmd = "python" + param;
+        p.innerHTML = batcmd;
+        main.appendChild(p);
+        var len = len = document.getElementById("processnum").value; // 进程数
+        for (var i = 1; i <= len; i++) {
+            objShell.Run(batcmd,1,false);
+        }
+    }
+</script>
+</Head>
+<body>
+<h3 align=left>
+    <font color='Orange'>NH Studio</font>
+</h3>
+<table border="1">
+<tr><td>进程数</td><td><input type="text" id="processnum" value="3" /></td></tr>
+<tr><td>脚本名称</td><td><input type="text" id="scriptname" value="xuankefunc.py" /></td></tr>
+<tr><td>ip</td><td><input type="text" id="ipaddress" value="119.145.67.59" /></td></tr>
+<tr><td>端口</td><td><input type="text" id="port" value="80" /></td></tr>
+<tr><td>学号</td><td><input type="text" id="studentid" value="" /></td></tr>
+<tr><td>密码</td><td><input type="text" id="password" value="" /></td></tr>
+<tr><td>课程名称</td><td><input type="text" id="tagclass" value="" /></td></tr>
+<tr><td>教师姓名</td><td><input type="text" id="teacher" value="" /></td></tr>
+<tr><td>上课时间</td><td><input type="text" id="classtime" value="" /></td></tr>
+<tr><td>已选修课的数量</td><td><input type="text" id="taglen" value="NULL" /></td></tr>
+<tr>
+<td colspan="2">
+    <button type="button" onclick="ReadExcel()" style="display:block;width:200px;margin: 0 auto;">run</button>
+</td>
+</tr>
+</table>
+<p>如果教师姓名 上课时间不清楚的话，这两个个参数请填NULL</p>
+<p>如果需要选修的课时网络课，教师姓名 上课时间 这两个参数也请填NULL</p>
+<p>如果填了已选修课的数量这个参数，将会通过已选课程表格里的课程数量判断选课是否成功</p>
+<p>如果不清楚默认参数的含义，请勿随意修改</p>
+<div id="main"></div>
+</body>
+</html>
