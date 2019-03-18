@@ -426,7 +426,7 @@ def xuankefinish(studentid, tagclass, teacher, classtime, desc, getstr = ""):
     filename += studentid
     filename += '-'
     filename += ''.join(random.sample(string.ascii_letters + string.digits, 8))
-    batcmd = 'echo ' + textstr + ' > ' + filename + '.txt'
+    batcmd = 'echo ' + textstr + ' > ' + filename + '.finish'
     os.system(batcmd)
 
     # 关闭同一个学号的选课进程
@@ -455,9 +455,14 @@ def xuanke(url, studentid, tagclass, teacher, classtime, taglen):
     getstr = result['getstr']
     # 检测是否已选课
     result = check_tag_class(getstr, tagclass, taglen, teacher, classtime)
-    if result['status'] == 1 or result['status'] == -1:
+    if result['status'] == 1:
         # 已选课
-        xuankefinish(studentid, tagclass, teacher, classtime, result['desc'], result['yixuanketabletr'])
+        desc = "打开选课页面时已选好目标课程-" + result['desc']
+        xuankefinish(studentid, tagclass, teacher, classtime, desc, result['yixuanketabletr'])
+    elif result['status'] == -1:
+        # 已选课
+        desc = "打开选课页面时已选好课但不是目标课程-" + result['desc']
+        xuankefinish(studentid, tagclass, teacher, classtime, desc, result['yixuanketabletr'])
 
     # 搜索目标课程
     result = srarch_tag_class(getstr, tagclass, teacher, classtime)

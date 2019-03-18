@@ -23,11 +23,11 @@ MinimizeButton = Yes>
         var filePath = document.getElementById("upfile").value;
         //创建一个可以将文件翻译成文件流的对象。
         var fso=new ActiveXObject("Scripting.FileSystemObject");
-        //用于创建一个textStream 对象 
+        //用于创建一个textStream 对象
         var f=fso.opentextfile(filePath, 1, false);
         //第一行是表头，抛弃
         f.Readline();
-        
+
         var objShell= new ActiveXObject("WScript.Shell")
 
         var scriptname = document.getElementById("scriptname").value // 脚本名称
@@ -38,7 +38,7 @@ MinimizeButton = Yes>
         while (!f.AtEndOfStream) {
             var line_str = f.Readline();
             line_arr = line_str.split(",");
-            
+
             var param = ""
             // param += " " + scriptname; // 脚本名称
             // param += " " + ipaddress; // ip
@@ -55,19 +55,19 @@ MinimizeButton = Yes>
                 batcmd = "python " + scriptname + " 119.145.67.59 80" + param;
                 p.innerHTML = batcmd;
                 main.appendChild(p);
-                // objShell.Run(batcmd,1,false);
+                objShell.Run(batcmd,1,false);
 
                 p = document.createElement("p");
                 batcmd = "python " + scriptname + " 119.145.67.59 8889" + param;
                 p.innerHTML = batcmd;
                 main.appendChild(p);
-                // objShell.Run(batcmd,1,false);
+                objShell.Run(batcmd,1,false);
 
                 p = document.createElement("p");
                 batcmd = "python " + scriptname + " 119.145.67.59 8890" + param;
                 p.innerHTML = batcmd;
                 main.appendChild(p);
-                // objShell.Run(batcmd,1,false);
+                objShell.Run(batcmd,1,false);
 
                 p = document.createElement("p");
                 p.innerHTML = "-----------------------------------------------------";
@@ -95,7 +95,7 @@ MinimizeButton = Yes>
     </h3>
     <div></div>
 
-    <label>脚本名称 <input type="text" id="scriptname" value="xuankefunc4.py" /></label>
+    <label>脚本名称 <input type="text" id="scriptname" value="xuankefunc5.py" /></label>
     <!-- <label>ip <input type="text" id="ipaddress" value="119.145.67.59" /></label>
     <label>端口 <input type="text" id="port" value="80" /></label> -->
     <label>进程数</td><td><input type="text" id="processnum" value="3" /></label>
